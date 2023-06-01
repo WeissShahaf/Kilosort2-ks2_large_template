@@ -1,4 +1,8 @@
 # Kilosort2: automated spike sorting with drift tracking and template matching on GPUs #
+modified from: https://github.com/jenniferColonell/Kilosort2/tree/ks2_large_template
+
+
+
 
 ![](https://github.com/MouseLand/Kilosort2/blob/master/Docs/img/templates.png)
 
