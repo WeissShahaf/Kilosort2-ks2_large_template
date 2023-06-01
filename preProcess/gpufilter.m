@@ -8,9 +8,9 @@ function datr = gpufilter(buff, ops, chanMap)
 
 % set up the parameters of the filter
 if isfield(ops,'fslow')&&ops.fslow<ops.fs/2
-    [b1, a1] = butter(3, [ops.fshigh/ops.fs,ops.fslow/ops.fs]*2, 'bandpass'); % butterworth filter with only 3 nodes (otherwise it's unstable for float32)
+    [b1, a1] = butter(12, [ops.fshigh/ops.fs,ops.fslow/ops.fs]*2, 'bandpass'); % butterworth filter with only 3 nodes (otherwise it's unstable for float32)
 else
-    [b1, a1] = butter(3, ops.fshigh/ops.fs*2, 'high'); % the default is to only do high-pass filtering at 150Hz
+    [b1, a1] = butter(12, ops.fshigh/ops.fs*2, 'high'); % the default is to only do high-pass filtering at 150Hz
 end
 
 dataRAW = gpuArray(buff); % move int16 data to GPU
@@ -26,8 +26,13 @@ if getOr(ops, 'CAR', 1)
     dataRAW = dataRAW - median(dataRAW, 2); % subtract median across channels
 end
 
-% next four lines should be equivalent to filtfilt (which cannot be used because it requires float64)
-datr = filter(b1, a1, dataRAW); % causal forward filter
-datr = flipud(datr); % reverse time
-datr = filter(b1, a1, datr); % causal forward filter again
-datr = flipud(datr); % reverse time back
+%filter
+if getOr(ops, 'doFilter', 1)
+    % next four lines should be equivalent to filtfilt (which cannot be used because it requires float64)
+    datr = filter(b1, a1, dataRAW); % causal forward filter
+    datr = flipud(datr); % reverse time
+    datr = filter(b1, a1, datr); % causal forward filter again
+    datr = flipud(datr); % reverse time back
+else
+    datr=  dataRAW;
+end
